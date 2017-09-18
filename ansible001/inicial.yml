@@ -1,6 +1,8 @@
 ---
   - name: Instalación y configuración de un stack para web
-    hosts: web, sql, nosql
+    hosts: all
     remote_user: root
+    user: vagrant
+    sudo: yes
     roles:
      - common

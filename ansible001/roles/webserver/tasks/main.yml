@@ -1,4 +1,10 @@
 ---
+- name: install dependencies
+  command: >
+    apt-get install python-pycurl -y -q
+    creates=/usr/share/doc/python-pycurl
+  sudo: yes
+
 - name: add repositories
   apt_repository: repo={{item}} state=present update_cache=yes
   with_items:
