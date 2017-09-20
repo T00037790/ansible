@@ -1,0 +1,7 @@
+---
+- name: Instalación y configuración de un stack para web
+  hosts: nosql
+  remote_user: root
+  sudo: yes
+  roles:
+   - nosqlserver
