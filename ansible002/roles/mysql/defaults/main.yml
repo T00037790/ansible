@@ -1,0 +1,9 @@
+---
+# defaults file for mysql
+axelitus_mysql_ver: 5.7
+axelitus_mysql_root_password: "r00t"
+axelitus_mysql_packages:
+  - mysql-server-{{ axelitus_mysql_ver }}
+  - mysql-client-{{ axelitus_mysql_ver }}
+  - python-mysqldb
+axelitus_mysql_secure: yes

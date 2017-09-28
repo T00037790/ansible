@@ -1,5 +1,38 @@
 ---
 - include: requeriments.yml
+- name: Install PHP with Modules and git
+  apt:
+    name: "{{ item }}"
+    state: present
+    update_cache: yes
+  with_items:
+    - php7.0
+    - php7.0-xmlrpc
+    - php7.0-zip
+    - php7.0-simplexml
+    - php7.0-intl
+    - php7.0-pgsql
+    - php7.0-curl
+    - php7.0-gd
+    - php7.0-mbstring
+    - php7.0-soap
+    - libapache2-mod-php7.0
+    - git
+
+- name: Install Apache and dependencies
+  apt:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - gcc
+    - make
+    - perl
+    - apache2
+
+- name: Start Apache Service
+  service:
+    name: apache2
+    state: started
 
 - name: Create user
   user: name="{{ moodle_user }}"
@@ -17,5 +50,5 @@
 - name: Create moodle docs directry
   file: dest="{{ moodle_docs }}" state=directory owner="{{ moodle_user }}"
 
-- name: Set up cron
-  cron: name="Moodle" job="/usr/bin/php {{ moodle_path }}/admin/cli/cron.php >/dev/null"
+#- name: Set up cron
+  #cron: name="Moodle" job="/usr/bin/php {{ moodle_path }}/admin/cli/cron.php >/dev/null"

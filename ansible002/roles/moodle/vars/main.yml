@@ -11,3 +11,4 @@ mysql_users:
 mysql_root_password: "{{ db_pwd_root }}"
 
 hostname: "{{ moodle_domain }}"
+port_default: 8000

@@ -1,0 +1,6 @@
+---
+# tasks file for mysql
+- name: Include OS specific variables
+  include_vars: "Debian.yml"
+- include: "Ubuntu/install_mysql.yml"
+- include: "Ubuntu/copy_mysql_config.yml"

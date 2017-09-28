@@ -1,9 +1,39 @@
 ---
 galaxy_info:
-  author: Alvaro
-  description: Moodle role
-  company: UTB
-  license: license (GPLv2, CC-BY, etc)
+  author: Whoever
+  description: Moodle install from git
+  company: empty
+  license: GPLv3
   min_ansible_version: 1.2
+  platforms:
+  - name: Ubuntu
+    versions:
+    - all
+  - name: Debian
+    versions:
+    - all
 
-dependencies: []
+  categories:
+  #- cloud
+  #- cloud:ec2
+  #- cloud:gce
+  #- cloud:rax
+  #- clustering
+  #- database
+  #- database:nosql
+  #- database:sql
+  #- development
+  #- monitoring
+  #- networking
+  #- packaging
+  #- system
+  - web
+dependencies:
+  # List your role dependencies here, one per line. Only
+  # dependencies available via galaxy should be listed here.
+  # Be sure to remove the '[]' above if you add dependencies
+  # to this list.
+  # - { role: pki }
+  #- { role: mysql }
+  #- { role: php5 }
+  #- { role: nginx }
