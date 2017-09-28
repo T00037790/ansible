@@ -1,0 +1,9 @@
+---
+galaxy_info:
+  author: Alvaro
+  description: Moodle role
+  company: UTB
+  license: license (GPLv2, CC-BY, etc)
+  min_ansible_version: 1.2
+
+dependencies: []
