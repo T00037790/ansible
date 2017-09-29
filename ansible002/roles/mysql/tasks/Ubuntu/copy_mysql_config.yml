@@ -1,8 +1,0 @@
-- name: Copy MySQL configuration
-  template:
-    src: "mysqld.cnf.j2"
-    dest: "{{ axelitus_mysql_server_conf }}"
-    owner: "root"
-    group: "root"
-  notify:
-    - Restart MySQL service
