@@ -22,18 +22,18 @@ pool_moodle:
   user: "{{ moodle_user }}"
   group: 'www-data'
 
-  listen: '/var/run/php5-fpm-{{ moodle_user}}.sock'
+  listen: '/var/run/php7.0-fpm-{{ moodle_user}}.sock'
 
-  open_basedir: "/usr/share/php5:/tmp:{{ moodle_path }}:{{ moodle_docs }}"
+  open_basedir: "/usr/share/php7.0:/tmp:{{ moodle_path }}:{{ moodle_docs }}"
 
 nginx_base_packages: [ 'nginx' ]
 
 nginx_default_status:
   - '127.0.0.0/8'
 
-nginx_default_type: 'php5'
+nginx_default_type: 'php7.0'
 
-nginx_upstreams: [ '{{ nginx_moodle_php5 }}' ]
+nginx_upstreams: [ '{{ nginx_moodle_php7.0 }}' ]
 nginx_moodle_php5:
   enabled: True
   name: '{{ moodle_user }}'
@@ -46,7 +46,7 @@ nginx_servers: [ '{{ moodle_server_php5 }}' ]
 # Default nginx site
 # List and description of available parameters can be found in nginx server
 # templates: templates/etc/nginx/sites-available/*.conf.j2
-moodle_server_php5:
+moodle_server_php7.0:
   enabled: True
   name: ["{{ moodle_domain }}"]
   default: True

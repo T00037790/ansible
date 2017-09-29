@@ -49,6 +49,3 @@
 
 - name: Create moodle docs directry
   file: dest="{{ moodle_docs }}" state=directory owner="{{ moodle_user }}"
-
-#- name: Set up cron
-  #cron: name="Moodle" job="/usr/bin/php {{ moodle_path }}/admin/cli/cron.php >/dev/null"
