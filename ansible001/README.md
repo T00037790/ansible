@@ -52,3 +52,19 @@ Dimensionar Redis no es solo una cuestión de dimensionar su memoria, sino tambi
 ________________________________________________________________________________________________________________________
 
 ![ansible001](https://user-images.githubusercontent.com/21178320/32872325-1fa3c8a8-ca54-11e7-8e17-631f075b1dca.png)
+
+
+
+## Instalación de roles
+
+### Role apache
+
+        ansible-playbook -i hosts ansible001/webserver.yml
+
+### Role MySQL
+
+        ansible-playbook -i hosts ansible001/sqlserver.yml
+
+### Role Redis
+
+        ansible-playbook -i hosts ansible001/nosql_redis.yml
