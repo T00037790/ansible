@@ -1,3 +1,0 @@
----
-- name: Instalación de Munin (Monitoreo)
-  apt: name=munin-node state=present
