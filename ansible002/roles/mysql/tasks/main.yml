@@ -1,116 +1,78 @@
 ---
+- name: Especificando contraseña root para MySQL
+  debconf:
+   name: mysql-server
+   question: mysql-server/root_password
+   value: "{{ mysql_root_password }}"
+   vtype: password
 
-# We want to have our configuration enabled as soon as possible for UTF-8
-# support, this check lets us know if MariaDB / MySQL server has just been
-# installed and we can quickly apply our own configuration and restart the
-# server before any more changes happen.
-- name: Check if database server is installed
-  environment:
-    LC_MESSAGES: 'C'
-  shell: dpkg-query -W -f='${Version}\n' 'mariadb-server' 'mysql-server' 'percona-server-server' 'mysql-wsrep-server-5.6' | grep -v '^$'
-  register: mariadb_server__register_version
-  check_mode: False
-  changed_when: False
-  failed_when: False
+- name: Confirmando contraseña root de MySQL
+  debconf:
+   name: mysql-server
+   question: mysql-server/root_password_again
+   value: "{{ mysql_root_password }}"
+   vtype: password
 
-- name: Add custom APT GPG key
-  apt_key:
-    state: 'present'
-    id: '{{ item }}'
-    keyserver: '{{ ansible_local.core.keyserver
-                   if (ansible_local|d() and ansible_local.core|d() and
-                       ansible_local.core.keyserver|d())
-                   else "hkp://pool.sks-keyservers.net" }}'
-  with_flattened: '{{ ([ mariadb_server__apt_key ]
-                       if mariadb_server__apt_key is string
-                       else mariadb_server__apt_key) }}'
-  when: mariadb_server__flavor in mariadb_server__apt_key_map.keys()
-
-- name: Add custom APT repository
-  apt_repository:
-    repo: '{{ item }}'
-    state: 'present'
-    update_cache: True
-    mode: '0644'
-  when: mariadb_server__flavor in mariadb_server__apt_repository_map.keys()
-  with_flattened: '{{ ([ mariadb_server__apt_repository_map[mariadb_server__flavor] ]
-                       if mariadb_server__apt_repository_map[mariadb_server__flavor] is string
-                       else mariadb_server__apt_repository_map[mariadb_server__flavor]) }}'
-
-- name: Install database server packages
+- name: Instalando MySQL y dependencies
   apt:
-    name: '{{ item }}'
-    state: 'present'
-    install_recommends: False
-  with_flattened:
-    - '{{ mariadb_server__base_packages }}'
-    - '{{ mariadb_server__packages_map[mariadb_server__flavor] }}'
-    - '{{ mariadb_server__packages }}'
-    - '{{ "automysqlbackup" if mariadb_server__backup|bool else [] }}'
-  register: mariadb_server__register_install_status
+   pkg: "{{ item }}"
+   state: installed
+  with_items:
+   - mysql-server
+   - python-mysqldb
 
-- name: Add database server user to specified groups
-  user:
-    name: 'mysql'
-    groups: '{{ mariadb_server__append_groups | join(",") | default(omit) }}'
-    append: True
-    createhome: False
-  when: mariadb_server__pki|bool
+- name: Seleccionando directorio de mysql por defecto
+  command: usermod -d /var/lib/mysql/ mysql
 
-- name: Check if MariaDB config directory exists
-  stat:
-    path: '/etc/mysql/mariadb.conf.d'
-  register: mariadb_server__register_confd
-
-- name: Ensure MariaDB data directory exists
-  file:
-    path: '{{ mariadb_server__datadir }}'
-    state: 'directory'
-    owner: 'mysql'
-    group: 'mysql'
-    mode: '0755'
-
-- name: Configure database client on first install
+- name: Añadiendo configuracion y realizando backup de la original
   template:
-    src: 'etc/mysql/conf.d/client.cnf.j2'
-    dest: '{{ mariadb_server__client_cnf_file }}'
-    owner: 'root'
-    group: 'root'
-    mode: '0644'
-  when: (mariadb_server__register_version|d() and not mariadb_server__register_version.stdout)
+   src: mysqld.cnf.j2
+   dest: /etc/mysql/mysql.conf.d/mysqld.cnf
+   owner: root
+   group: root
+   mode: 0644
+   backup: yes
 
-- name: Configure database server
-  include: 'configure_server.yml'
-  tags: [ 'role::mariadb_server:configure' ]
+#Problemas iniciando servicio con modulo service (no lo inicia)
+- name: Iniciando servicio
+  command: service mysql start
+  register: start
 
-- name: Restart database server on first install
-  service:
-    name: 'mysql'
-    state: 'restarted'
-  when: ((mariadb_server__register_version|d() and not mariadb_server__register_version.stdout) and
-         (mariadb_server__register_install_status|d() and mariadb_server__register_install_status|changed))
+- name: Respuesta de inicio
+  debug: var=start
 
-- name: Secure database server
-  include: 'secure_installation.yml'
-  tags: [ 'role::mariadb_server:secure' ]
+- name: Removiendo todas las cuentas anonimas
+  mysql_user:
+    login_user: "{{ mysql_root_usr }}"
+    login_password: "{{ mysql_root_password }}"
+    login_unix_socket: "{{ mysql_sock_path }}"
+    name: ''
+    host_all: yes
+    state: absent
+  notify:
+   - restart mysql
 
-- name: Make sure that local fact directory exists
-  file:
-    dest: '/etc/ansible/facts.d'
-    state: 'directory'
-    owner: 'root'
-    group: 'root'
-    mode: '0755'
+ #GRANT ALL ON *.* to moodle@'host_ip or % (for all)' IDENTIFIED BY 'pwd';
+- name: Creando usuario moodle con permisos de conexion externa
+  mysql_user:
+    login_user: "{{ mysql_root_usr }}"
+    login_password: "{{ mysql_root_password }}"
+    name: moodle
+    host: "{{ item }}"
+    password: "{{ mysql_moodle_pwd }}"
+    priv: "*.*:ALL,GRANT"
+    state: present
+  with_items:
+   - 127.0.0.1
+   - "localhost"
+   - "%"
+  notify:
+   - restart mysql
 
-- name: Save MariaDB local facts
-  template:
-    src: 'etc/ansible/facts.d/mariadb.fact.j2'
-    dest: '/etc/ansible/facts.d/mariadb.fact'
-    owner: 'root'
-    group: 'root'
-    mode: '0644'
-  register: mariadb_server__register_local_facts
-
-- name: Re-read local facts if they have been modified
-  action: setup
-  when: mariadb_server__register_local_facts|changed
+- name: Creando base de datos para moodle
+  mysql_db:
+    login_user: "{{ mysql_moodle_usr }}"
+    login_password: "{{ mysql_moodle_pwd }}"
+    name: moodle
+    encoding: utf8
+    state: present
