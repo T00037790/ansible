@@ -1,7 +1,0 @@
----
-- name: Instalación de Munin (Monitoreo)
-  command: >
-    apt-get update
-
-- name: lo que sea
-  apt: name=munin-node state=present
