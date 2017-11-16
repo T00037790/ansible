@@ -1,7 +1,6 @@
 ---
 - name: Instalación y configuración de un stack para web
-  hosts: sql
+  hosts: nosql
   remote_user: root
   roles:
-   - mysql
-   
+   - redis
