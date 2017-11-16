@@ -4,9 +4,9 @@
 
 instalación y configuración de los siguientes 3 servicios:
 
-  Apache
-  MySQL
-  Redis
+        Apache
+        MySQL
+        Redis
 
 ### Apache
 
@@ -40,7 +40,6 @@ Redis es una base de datos NoSQL. Es una base de datos no relacional y funciona 
 
 #### Requisitos
 
-
 Dimensionar Redis no es solo una cuestión de dimensionar su memoria, sino también ajustar el resto de los recursos. Sé consciente de:
 
       Una máquina (o máquina virtual) debería estar dedicada a Redis.
@@ -50,6 +49,6 @@ Dimensionar Redis no es solo una cuestión de dimensionar su memoria, sino tambi
 
 
 ## Arquitectura
-
+________________________________________________________________________________________________________________________
 
 ![ansible001](https://user-images.githubusercontent.com/21178320/32872325-1fa3c8a8-ca54-11e7-8e17-631f075b1dca.png)

@@ -1,22 +1,24 @@
 ---
-- name: install dependencies
-  command: >
-    apt-get install python-pycurl -y -q
-    creates=/usr/share/doc/python-pycurl
-  sudo: yes
-
-- name: add repositories
-  apt_repository: repo={{item}} state=present update_cache=yes
-  with_items:
-    - ppa:nginx/stable
-
-- name: instalación de nginx
+- name: instalación de php y requerimientos
   apt:
-    name: nginx
+    name: "{{ item }}"
+    state: present
+    update_cache: yes
+  with_items:
+    - php7.0-json
+    - php7.0-intl
+    - php7.0-xml
+    - php7.0-mysql
+    - php7.0-mbstring
+    - libapache2-mod-php7.0
+
+- name: instalación de apache
+  apt:
+    name: apache2
     state: present
 
-- name: start nginx
+- name: iniciar servicio de apache
   service:
-    name: nginx
+    name: apache2
     state: started
     enabled: yes
