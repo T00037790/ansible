@@ -1,8 +1,0 @@
----
-  - name: Instalación y configuración de un stack para web
-    hosts: all
-    remote_user: root
-    user: vagrant
-    sudo: yes
-    roles:
-     - common
