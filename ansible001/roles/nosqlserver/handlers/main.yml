@@ -1,4 +1,9 @@
 ---
 # handlers file for nosqlserver
 - name: restart redis
-  service: "name={{ redis_daemon }} state=restarted"
+  become: yes
+  service: name=redis state=restarted enabled=yes sleep=1
+
+- name: reload redis
+  become: yes
+service: name=redis state=reloaded

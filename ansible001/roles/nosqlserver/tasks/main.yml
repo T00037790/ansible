@@ -1,20 +1,63 @@
 ---
 # tasks file for nosqlserver
-- name: Define redis_package.
-  set_fact:
-    redis_package: "{{ __redis_package }}"
-  when: redis_package is not defined
+- name: add Redis PPA
+  become: yes
+  apt_repository: repo=ppa:chris-lea/redis-server
 
+- name: install 'redis-server'
+  become: yes
+  apt: pkg=redis-server state=latest
+  register: redis_install_result
 
-- name: Ensure Redis is installed.
-  apt:
-    name: "{{ redis_package }}"
-  
+- name: stop default server
+  become: yes
+  command: /usr/bin/redis-cli -p 6379 shutdown
+  when: redis_install_result.changed
+  ignore_errors: yes
 
-- name: Define redis_package.
-  set_fact:
-    redis_package: "{{ __redis_package }}"
-  when: redis_package is not defined
+- name: stop default server
+  become: yes
+  command: /etc/init.d/redis-server stop
+  when: redis_install_result.changed
+  ignore_errors: yes
 
-- name: Ensure Redis is running and enabled on boot.
-  service: "name={{ redis_daemon }} state=started enabled=yes"
+- name: stop default server
+  service: name=redis-server state=stopped enabled=no
+  when: redis_install_result.changed
+  ignore_errors: yes
+
+- name: create redis data dir
+  become: yes
+  file: >
+    path={{ redis.config.dir }}
+    state=directory
+    owner=redis
+    group=redis
+- name: remove default redis config (if configfile path is different)
+  become: yes
+  file: path=/etc/redis/redis.conf state=absent
+  when: redis.config_path != '/etc/redis/redis.conf'
+
+- name: generate upstart script
+  become: yes
+  template: >
+    src=upstart.conf.j2
+    dest=/etc/init/redis.conf
+    owner=root
+    group=root
+    mode=0644
+  notify: restart redis
+
+- name: generate config file
+  become: yes
+  template: >
+    src=redis.conf.j2
+    dest=/etc/redis/redis.conf
+    owner=root
+    group=root
+    mode=0644
+    backup=yes
+  notify: restart redis
+
+- name: flush handlers
+meta: flush_handlers
